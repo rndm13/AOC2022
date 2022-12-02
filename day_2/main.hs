@@ -1,57 +1,53 @@
 import Data.List.Extra
 import Data.List
 import Data.Maybe
+import Data.Char
 
 data Hand = Rock
           | Paper
           | Scissors
           deriving (Show, Eq)
 
-hands = [Rock, Paper, Scissors]
-
 getHand :: Char -> Hand
-getHand 'A' = Rock
-getHand 'B' = Paper
-getHand 'C' = Scissors
-getHand 'X' = Rock
-getHand 'Y' = Paper
-getHand 'Z' = Scissors
+getHand c
+  | c <= 'C'  = hands !! ((ord c) - (ord 'A'))
+  | otherwise = hands !! ((ord c) - (ord 'X'))
+
+hands = Rock:Paper:Scissors:hands
 
 pairs :: [a] -> [(a,a)]
 pairs = (map ((,) <$> head <*> last)) . (chunksOf 2)
 
-getInputP1 :: String -> [(Hand, Hand)]
-getInputP1 = pairs . (map (getHand . head)) . words
+getInput :: String -> [(Char, Char)]
+getInput = pairs . (map head) . words
 
-getFromCondition :: (Char, Char) -> (Hand, Hand)
-getFromCondition (a, cond)
-  | cond == 'X' = (h, (cycle hands) !! ((fromJust $ elemIndex h hands) + 2))
-  | cond == 'Y' = (h, h)
-  | cond == 'Z' = (h, (cycle hands) !! ((fromJust $ elemIndex h hands) + 1))
+getHandScore :: Hand -> Int
+getHandScore = fromJust . (flip elemIndex hands)
+
+getScoreP2 :: (Char, Char) -> Int
+getScoreP2 (a, cond)
+  | cond == 'X' = ((score + 2) `mod` 3 + 1)
+  | cond == 'Y' = (score + 4)
+  | cond == 'Z' = ((score + 1) `mod` 3 + 7)
   where
-    h = getHand a
+    score = getHandScore . getHand $ a
 
-getInputP2 :: String -> [(Hand, Hand)]
-getInputP2 = (map getFromCondition) . pairs . (map head) . words
-
-getResult :: (Hand, Hand) -> Int
-getResult (a, b) 
-  | diff == 0 = 3
-  | diff == 1 || diff == -2 = 6
+getResult :: Hand -> Hand -> Int
+getResult Rock Paper = 6 
+getResult Paper Scissors = 6 
+getResult Scissors Rock = 6 
+getResult a b
+  | a == b = 3
   | otherwise = 0
-  where 
-    aind = (fromJust $ elemIndex a hands)
-    bind = (fromJust $ elemIndex b hands)
-    diff = bind - aind
 
-getScore :: (Hand, Hand) -> Int
-getScore (a, b) = (getResult (a, b)) + (fromJust $ elemIndex b hands) + 1
-
-solve :: [(Hand, Hand)] -> Int
-solve = foldr (+) 0 . (map getScore) 
+getScoreP1 :: (Char, Char) -> Int
+getScoreP1 (a, b) = (getResult ha hb) + (getHandScore hb) + 1
+  where
+    ha = getHand a
+    hb = getHand b
 
 main :: IO ()
 main = do
    input <- getContents
-   print . solve . getInputP1 $ input 
-   print . solve . getInputP2 $ input 
+   print . sum . (map getScoreP1) . getInput $ input 
+   print . sum . (map getScoreP2) . getInput $ input 
