@@ -1,37 +1,30 @@
 import qualified Data.Char       as C
 import qualified Data.List       as L
+import qualified Data.Maybe      as M
 import qualified Data.List.Extra as LE
 
 getPriority :: Char -> Int
-getPriority c
-  | c <= 'Z' = (C.ord c) - (C.ord 'A') + 27
-  | c >= 'a' = (C.ord c) - (C.ord 'a') + 1
+getPriority c = if c <= 'Z' then ic - 38 else ic - 96
+  where ic = C.ord c
 
-getComparments :: String -> (String, String)
-getComparments str = splitAt ((length str) `div` 2) str
+getCompartments :: String -> (String, String)
+getCompartments str = splitAt (length str `div` 2) str
 
-findMatching :: Ord a => ([a], [a]) -> [a]
-findMatching (arr1, arr2) = filter (flip (elem) arr1) arr2
-
+intersection :: Ord a => [a] -> [a] -> [a]
+intersection arr1 = filter (`elem` arr1) 
 
 solveP1 :: [String] -> [Int]
-solveP1 = map (priorityFirst . matches)
-  where
-    matches = findMatching . getComparments
+solveP1 = map (getPriorityFromFirst . uncurry (intersection) . getCompartments)
 
-priorityFirst :: String -> Int
-priorityFirst v =
-  if null v
-    then 0
-    else (getPriority . head $ v)
+getPriorityFromFirst :: String -> Int
+getPriorityFromFirst = maybe 0 (getPriority) . M.listToMaybe
 
 solveP2 :: [String] -> [Int]
-solveP2 = (map (priorityFirst . matches)) . (filter ((3==). length)) . LE.chunksOf 3
-  where
-    matches = \[a,b,c] -> findMatching (a, findMatching (b,c))
+solveP2 = (map (getPriorityFromFirst . matches)) . (filter ((3==). length)) . LE.chunksOf 3
+  where matches = \(a:arr) -> foldr intersection a arr
 
 main :: IO ()
 main = do
-  input <- getContents
-  print . sum . solveP1 . lines $ input
-  print . sum . solveP2 . lines $ input
+  input <- (lines <$> getContents)
+  print . sum . solveP1 $ input
+  print . sum . solveP2 $ input
