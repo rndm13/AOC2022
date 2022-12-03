@@ -1,7 +1,6 @@
 import qualified Data.Char       as C
 import qualified Data.List       as L
 import qualified Data.List.Extra as LE
-import qualified Data.Maybe      as M
 
 getPriority :: Char -> Int
 getPriority c
@@ -12,7 +11,8 @@ getComparments :: String -> (String, String)
 getComparments str = splitAt ((length str) `div` 2) str
 
 findMatching :: Ord a => ([a], [a]) -> [a]
-findMatching (arr1, arr2) = filter (\v -> M.isJust . L.find (==v) $ arr1) arr2
+findMatching (arr1, arr2) = filter (flip (elem) arr1) arr2
+
 
 solveP1 :: [String] -> [Int]
 solveP1 = map (priorityFirst . matches)
