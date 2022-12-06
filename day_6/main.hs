@@ -11,6 +11,4 @@ solve lngth str =
   . take (length str - lngth) . scanr (\x a -> x:(take (lngth - 1) a)) [] $ str
 
 main :: IO ()
-main = do
-  input <- getLine
-  print . (solve 4 &&& solve 14) $ input
+main = getLine >>= print . (solve 4 &&& solve 14)
