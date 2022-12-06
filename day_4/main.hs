@@ -28,4 +28,4 @@ toBoth toAdd orig = orig >>> (toAdd *** toAdd)
 main :: IO ()
 main = do
   input <- ((readRangePair <$>) . lines) <$> getContents
-  print . ((E.both sum) . unzip . (toBoth (fromEnum . Mi.getAny) (contains &&& overlaps) <$>)) $ input -- Part 1 and Part 2
+  print <<< ((E.both sum) <<< unzip <<< (toBoth (Mi.getAny >>> fromEnum) (contains &&& overlaps) <$>)) $ input -- Part 1 and Part 2

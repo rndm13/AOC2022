@@ -2,7 +2,7 @@ import qualified Data.List     as L
 import           Control.Arrow
 
 allDifferent :: (Ord a) => [a] -> Bool
-allDifferent []  = True
+allDifferent [] = True
 allDifferent (a:nextArr) = notElem a nextArr && (allDifferent nextArr) 
 
 solve :: Int -> String -> Int
