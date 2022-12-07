@@ -74,6 +74,6 @@ solveP2 root = minimum . filter (>=rootSize - 40000000) $ sizes
     rootSize = head sizes
 
 main :: IO ()
-main = do
-  root <- last . (flip makeFileSystem) [Dir (Ma.empty) "/" 0] . groupLs . (parseLine <$>) . lines <$> getContents 
-  print . (solveP1 &&& solveP2) $ root
+main = 
+  last . (flip makeFileSystem) [Dir (Ma.empty) "/" 0] . groupLs . (parseLine <$>) . lines <$> getContents >>=
+  print . (solveP1 &&& solveP2) 
