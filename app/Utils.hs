@@ -50,7 +50,7 @@ safeHead arr = Just (head arr)
 readAsList :: Read r => [String] -> r
 readAsList = read . printf "[%s]" . L.intercalate ","
 
-count :: (a -> Bool) -> [a] -> Int
+count :: (Foldable t) => (a -> Bool) -> t a -> Int
 count f arr = foldr (\x s -> if (f x) then (s + 1) else s) 0 arr
 
 toBoth :: Arrow a => a c d -> a b (c, c) -> a b (d, d)

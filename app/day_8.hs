@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 import           Data.Char       (digitToInt)
 import qualified Data.List       as L
 import qualified Data.Monoid     as Mi
@@ -15,8 +13,11 @@ undoRotations [left, right, top, bottom] = [left, reverse <$> right, L.transpose
 getVisibility :: [Int] -> [Bool]
 getVisibility arr = zipWith (>) arr . scanl max (-1) $ arr
 
+getScore :: [Int] -> Int
+getScore arr = (maybe 0 id) . safeHead . tail . scanr (\a s -> if a then 1 else s + 1) 0 . zipWith (>=) arr . scanl max (-1) $ arr
+
 getScores :: [Int] -> [Int] 
-getScores arr = tail . scanr (\a s -> if a then 1 else s + 1) 0 . zipWith (>=) arr . scanl max (-1) $ arr
+getScores input = init . (getScore <$>) . scanr (:) [] $ input
 
 parseInput :: String -> [[Int]]
 parseInput = ((digitToInt <$>) <$>) . lines
