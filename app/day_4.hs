@@ -3,6 +3,7 @@ import qualified Data.Monoid      as Mi
 import qualified Control.Monad    as M
 import qualified Data.List.Split  as LS
 import qualified Data.Tuple.Extra as E
+import Utils
 
 readRangePair :: String -> [Int]
 readRangePair str = read <$> ranges
@@ -18,12 +19,6 @@ overlaps [al, ar, bl, br] = foldMap Mi.Any
   [ bl <= ar && ar <= br
   , al <= br && br <= ar
   ] <> contains [al, ar, bl, br]
-
-count :: (a -> Bool) -> [a] -> Int
-count f arr = foldr (\x s -> if (f x) then (s + 1) else s) 0 arr
-
-toBoth :: Arrow a => a c d -> a b (c, c) -> a b (d, d)
-toBoth toAdd orig = orig >>> (toAdd *** toAdd)
 
 main :: IO ()
 main = do

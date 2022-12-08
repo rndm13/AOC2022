@@ -5,13 +5,14 @@ module Utils( makeUncurry
             , makeArrayToTuple
             , dropr
             , safeHead
-            , readAsList) where
-import           Control.Lens
+            , readAsList
+            , count
+            , toBoth) where
+import           Control.Arrow              ((***), Arrow, (>>>))
 import qualified Control.Monad              as M
 import qualified Data.List                  as L
 import           Text.Printf
 import           Language.Haskell.TH
-import           Language.Haskell.TH.Syntax
 
 makeUncurry :: Int -> Q Exp
 makeUncurry n = do
@@ -48,3 +49,9 @@ safeHead arr = Just (head arr)
 
 readAsList :: Read r => [String] -> r
 readAsList = read . printf "[%s]" . L.intercalate ","
+
+count :: (a -> Bool) -> [a] -> Int
+count f arr = foldr (\x s -> if (f x) then (s + 1) else s) 0 arr
+
+toBoth :: Arrow a => a c d -> a b (c, c) -> a b (d, d)
+toBoth toAdd orig = orig >>> (toAdd *** toAdd) 
