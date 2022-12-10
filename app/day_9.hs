@@ -22,8 +22,7 @@ instance Mi.Monoid Position where
 
 data Move = Move 
   { _dir   :: Position
-  , _count :: Int 
-  }
+  , _count :: Int }
 
 instance Read Move where
   readsPrec _ i = [(Move dirP count, rest)]
