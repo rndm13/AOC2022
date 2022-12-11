@@ -1,18 +1,19 @@
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE MultiWayIf         #-}
 
-import Control.Arrow
+import           Control.Arrow
 import qualified Data.List       as L
 import qualified Data.List.Split as LS
 
-data Instruction = Noop 
-                 | Addx Int 
+data Instruction = Noop
+                 | Addx Int
                  deriving stock (Show)
 
 instance Read Instruction where
-  readsPrec _ i = 
-    case insName of
-      "noop" -> [(Noop, restNoop)]
-      "addx" -> [(Addx cnt, restAddx)]
+  readsPrec _ i =
+    if | insName == "noop" -> [(Noop, restNoop)]
+       | insName == "addx" -> [(Addx cnt, restAddx)]
+       | otherwise -> error ("unknown instruction '" <> insName <> "'")
     where insName  = take 4 i
           cnt      = read . takeWhile (/=' ') . drop 5 $ i
           restNoop = drop 4 i
@@ -24,7 +25,7 @@ doInstruction cyc ind (Addx x) = rest <> ((id *** (+x)) <$> cur)
   where (rest, cur) = L.partition ((<ind) . fst) cyc
 
 instructionTime :: Instruction -> Int
-instructionTime Noop = 1
+instructionTime  Noop    = 1
 instructionTime (Addx _) = 2
 
 indexInstructions :: [Instruction] -> [(Int, Instruction)]
@@ -32,7 +33,7 @@ indexInstructions instr = zip (tail . scanl (\s x -> s + (instructionTime x)) 1 
 
 completeInstructions :: [Instruction] -> [Int] -> [(Int, Int)]
 completeInstructions instr ind = foldr (\i cyc -> (uncurry $ doInstruction cyc) i) cycles . indexInstructions $ instr
-  where cycles = ((,) <$> id <*> (const 1)) <$> ind
+  where cycles = (id &&& const 1) <$> ind
 
 p1Cycles :: [Int]
 p1Cycles = [20,60,100,140,180,220]
@@ -44,7 +45,7 @@ allCycles :: [Int]
 allCycles = [1..240]
 
 drawPixel :: (Int,Int) -> Char
-drawPixel (a, b) 
+drawPixel (a, b)
   | abs (((a - 1) `rem` 40) - b) <= 1 = '#'
   | otherwise = '.'
 
