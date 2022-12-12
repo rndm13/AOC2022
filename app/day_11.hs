@@ -10,7 +10,7 @@ data Monkey = Monkey
   { _id          :: Int
   , _items       :: [Int]
   , _operation   :: (Int -> Int)
-  , _test        :: (Int -> Bool)
+  , _divisor     :: Int
   , _true        :: Int -- Id of monkey to throw when test is true
   , _false       :: Int -- when false
   , _inspections :: Int
@@ -20,7 +20,7 @@ makeLenses ''Monkey
 
 monkeyOp :: String -> Int -> Int
 monkeyOp [] _ = error "no string to turn into operation"
-monkeyOp (_:str) val = (func val rhs) `div` 3
+monkeyOp (_:str) val = (func val rhs)
   where noNew = drop 6 str
         oper  = noNew !! 4
         func  = if | oper == '+' -> (+)
@@ -30,10 +30,13 @@ monkeyOp (_:str) val = (func val rhs) `div` 3
         rhs   = if | rstr == "old" -> val
                    | otherwise -> read rstr
         
-monkeyTest :: String -> Int -> Bool
-monkeyTest [] _ = error "no string to turn into test"
-monkeyTest (_:str) val = val `rem` rhs /= 0
+monkeyDivisor :: String -> Int
+monkeyDivisor [] = error "no string to turn into test"
+monkeyDivisor (_:str) = rhs
   where rhs = read . getLastStr $ str
+
+_test :: Monkey -> Int -> Bool
+_test m x = (x `mod` (_divisor m)) /= 0
 
 dropToCol :: String -> String
 dropToCol = tail . dropWhile (/=':')
@@ -50,7 +53,7 @@ instance Read Monkey where
           i_ind    = readI . getLastStr . init $ li !! 0
           i_items  = (readI <$>) . LS.splitWhen (==',') . dropToCol $ li !! 1
           i_oper   = monkeyOp . dropToCol $ li !! 2
-          i_test   = monkeyTest . dropToCol $ li !! 3
+          i_test   = monkeyDivisor . dropToCol $ li !! 3
           i_true   = readI . getLastStr $ li !! 4
           i_false  = readI . getLastStr $ li !! 5
 
@@ -83,16 +86,25 @@ setNewItems monkeys newItems = zipWith (\m ni -> m & items .~ ni) monkeys newIte
 updateMonkeys :: [Monkey] -> [Monkey]
 updateMonkeys monkeys = foldl updateMonkey monkeys [0..(length monkeys - 1)]
 
-solveP1 :: [Monkey] -> Int
-solveP1 monkeys = 
+solveN :: Int -> [Monkey] -> Int
+solveN v monkeys = 
   $(makeArrayBinder 2) (*) . 
   take 2 . 
   reverse .
   L.sort .
   (map _inspections) $
-  ((iterate (updateMonkeys) monkeys) !! 20)
+  ((iterate (updateMonkeys) monkeys) !! v)
+
+solveP1 :: [Monkey] -> Int
+solveP1 input = solveN 20 monkeys
+  where monkeys = map (operation %~ ((`div` 3) . )) input
+
+solveP2 :: [Monkey] -> Int
+solveP2 input = solveN 10000 monkeys
+  where monkeys = map (operation %~ ((`mod` allLcm) . )) input
+        allLcm  = foldr (\x s -> s `lcm` (_divisor x)) 1 input
 
 main :: IO ()
 main = do
   input <- ((read :: String -> Monkey) . L.intercalate "\n" <$>) . LS.chunksOf 7 . lines <$> getContents
-  print . solveP1 $ input
+  print . (solveP1 &&& solveP2) $ input
