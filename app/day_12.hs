@@ -2,8 +2,6 @@
 {-# LANGUAGE MultiWayIf         #-}
 
 import           Data.Char   (ord)
-import           Data.Tuple  (swap)
-import qualified Data.Graph  as G
 import qualified Data.List   as L
 import qualified Data.Matrix as Mx
 import qualified Data.Maybe  as Mb
