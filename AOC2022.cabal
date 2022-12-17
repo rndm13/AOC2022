@@ -135,3 +135,16 @@ executable day_13
                       split
     hs-source-dirs:   app
     default-language: Haskell2010
+
+executable day_14
+    main-is:          day_14.hs
+    ghc-options:      -threaded
+    other-modules:    Utils
+    build-depends:    base,
+                      template-haskell,
+                      lens,
+                      split,
+                      hashmap,
+                      containers
+    hs-source-dirs:   app
+    default-language: Haskell2010

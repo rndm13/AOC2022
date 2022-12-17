@@ -16,7 +16,7 @@ instance Read MixedList where
 
 instance Show MixedList where
   show (Single i) = show i
-  show (List i  ) = show i
+  show (List   i) = show i
 
 instance Ord MixedList where
   compare (Single a) (Single b) = compare a b
