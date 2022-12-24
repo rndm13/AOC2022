@@ -16,6 +16,9 @@ data Point = Point
 readI :: String -> Int
 readI = read
 
+readP :: String -> Path
+readP = read
+
 instance Read Point where
   readsPrec _ i = [(Point x y, rest)]
     where x = readI . takeWhile (/=';') $ i
@@ -32,9 +35,6 @@ replace search replacement original = L.intercalate replacement . LS.splitOn sea
 instance Read Path where
   readsPrec _ i = (Path *** id) <$> (readList :: ReadS [Point]) repText
     where repText = '[':(replace " -> " "," . replace "," ";" $ i ++ "]")
-
-readP :: String -> Path
-readP = read
 
 fillPath :: Path -> Path
 fillPath (Path points) = Path ((head points):(concat . zipWith (makeLine) points . tail $ points))

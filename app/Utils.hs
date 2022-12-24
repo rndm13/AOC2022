@@ -1,15 +1,19 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Utils( makeUncurry
-            , makeArrayBinder
-            , makeArrayToTuple
+            , makeListBinder
+            , makeListToTuple
             , dropr
             , safeHead
             , readAsList
             , count
-            , toBoth) where
+            , toBoth
+            , iterateM
+            , iterateM') where
+
 import           Control.Arrow              ((***), Arrow, (>>>))
 import qualified Control.Monad              as M
+import           Data.Maybe                 (isJust, isNothing, fromJust)
 import qualified Data.List                  as L
 import           Text.Printf
 import           Language.Haskell.TH
@@ -22,16 +26,16 @@ makeUncurry n = do
   appNames <- (foldl (appE) (varE funcName) $ varE <$> names)
   return $ LamE [VarP funcName] (LamE [tupNames] appNames)
 
-makeArrayBinder :: Int -> Q Exp
-makeArrayBinder n = do
+makeListBinder :: Int -> Q Exp
+makeListBinder n = do
   funcName  <- newName "f"
   names     <- genNames n
   listNames <- listP $ varP <$> names
   appNames  <- (foldl (appE) (varE funcName) $ varE <$> names)
   return $ LamE [VarP funcName] (LamE [listNames] appNames)
 
-makeArrayToTuple :: Int -> Q Exp
-makeArrayToTuple n = do
+makeListToTuple :: Int -> Q Exp
+makeListToTuple n = do
   names     <- genNames n
   listNames <- listP $ varP <$> names
   tupNames  <- tupE $ varE <$> names
@@ -55,3 +59,16 @@ count f arr = foldr (\x s -> if (f x) then (s + 1) else s) 0 arr
 
 toBoth :: Arrow a => a c d -> a b (c, c) -> a b (d, d)
 toBoth toAdd orig = orig >>> (toAdd *** toAdd) 
+
+
+iterateM' :: (a -> Maybe a) -> a -> Maybe a
+iterateM' func input 
+  | isJust next = next >>= iterateM' func 
+  | otherwise = cur
+  where cur = func input
+        next = cur >>= func
+        
+iterateM :: (a -> Maybe a) -> a -> [a]
+iterateM func input
+  | isNothing . func $ input = []
+  | otherwise = (fromJust . func $ input):(iterateM func (fromJust . func $ input))

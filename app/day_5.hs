@@ -56,7 +56,7 @@ main = do
              .  head)
             --- Parsing moves
             <*> (Move
-             .  $(makeArrayToTuple 3)
+             .  $(makeListToTuple 3)
              .  readAsList
              .  filter (not . null)
              .  LS.splitWhen (==' ')

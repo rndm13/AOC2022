@@ -22,7 +22,7 @@ parseLine str
   | first4 == "$ cd" = Cd . drop 1 $ rest
   | first4 == "$ ls" = Ls $ []
   | first4 == "dir " = Ls . L.singleton . Dir (mempty :: Ma.Map String File) rest $ 0
-  | otherwise        = Ls . L.singleton . (uncurry Data) . (read *** id) . $(makeArrayToTuple 2) . LS.splitWhen (==' ') $ str
+  | otherwise        = Ls . L.singleton . (uncurry Data) . (read *** id) . $(makeListToTuple 2) . LS.splitWhen (==' ') $ str
   where first4 = take 4 str
         rest   = drop 4 str
 

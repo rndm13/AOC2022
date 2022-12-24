@@ -88,7 +88,7 @@ updateMonkeys monkeys = foldl updateMonkey monkeys [0..(length monkeys - 1)]
 
 solveN :: Int -> [Monkey] -> Int
 solveN v monkeys = 
-  $(makeArrayBinder 2) (*) . 
+  $(makeListBinder 2) (*) . 
   take 2 . 
   reverse .
   L.sort .
